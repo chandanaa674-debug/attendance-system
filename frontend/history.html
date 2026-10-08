@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots - Attendance History</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Institutional Header & Branding Bar -->
+  <header class="header-wrapper">
+    <div class="top-branding-bar">
+      <a href="index.html" class="institution-group">
+        <div class="institution-logo-shield">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="institution-text-block">
+          <span class="college-name">SRINIVAS INSTITUTE OF TECHNOLOGY</span>
+          <span class="college-location">Valachil, Mangaluru</span>
+          <div class="club-branding-badge-container">
+            <span class="club-tag">TechBots</span>
+            <span class="system-title-tag">RFID ATTENDANCE SYSTEM</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-status-info">
+        <div class="status-indicator-pill">
+          <span class="status-dot"></span>
+          <span>System Active</span>
+        </div>
+        <div class="live-clock-pill" id="live-clock">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="members.html" class="nav-menu-item">
+            <i class="fa-solid fa-users"></i> Members
+          </a>
+        </li>
+        <li>
+          <a href="attendance.html" class="nav-menu-item">
+            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+          </a>
+        </li>
+        <li>
+          <a href="history.html" class="nav-menu-item active">
+            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-main-heading">Attendance Archive & History</h1>
+        <p class="page-sub-heading">Inspect historical club attendance sessions by date</p>
+      </div>
+    </div>
+
+    <!-- Date Filter Strip -->
+    <div class="history-filter-strip">
+      <label for="history-date-picker" style="font-weight: 600; font-size: 0.88rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.5rem;">
+        <i class="fa-regular fa-calendar-days" style="color: var(--primary);"></i> Select Date:
+      </label>
+      <input type="date" id="history-date-picker" class="date-selector-field">
+      <button class="btn-primary-scan" id="btn-fetch-history" style="padding: 0.45rem 0.95rem; font-size: 0.86rem;">
+        <i class="fa-solid fa-magnifying-glass"></i> Load Attendance
+      </button>
+
+      <div style="margin-left: auto;">
+        <a href="#" class="btn-secondary btn-export-excel" id="btn-export-history" download>
+          <i class="fa-solid fa-file-excel"></i> Export Selected Date
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI Summary Grid for Selected Date -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Session Date</span>
+          <i class="fa-regular fa-calendar kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="history-date-display" style="font-size: 1.45rem;">----/--/--</div>
+        <div class="kpi-caption">Selected archive date</div>
+      </div>
+
+      <div class="kpi-card present">
+        <div class="kpi-header">
+          <span class="kpi-title">Present</span>
+          <i class="fa-solid fa-door-open kpi-icon" style="color: #059669;"></i>
+        </div>
+        <div class="kpi-value" id="hist-stat-present">0</div>
+        <div class="kpi-caption">Scanned IN</div>
+      </div>
+
+      <div class="kpi-card exited">
+        <div class="kpi-header">
+          <span class="kpi-title">Exited</span>
+          <i class="fa-solid fa-door-closed kpi-icon" style="color: #d97706;"></i>
+        </div>
+        <div class="kpi-value" id="hist-stat-exited">0</div>
+        <div class="kpi-caption">Scanned OUT</div>
+      </div>
+
+      <div class="kpi-card not-scanned">
+        <div class="kpi-header">
+          <span class="kpi-title">Not Scanned</span>
+          <i class="fa-solid fa-user-xmark kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="hist-stat-not-scanned">0</div>
+        <div class="kpi-caption">Absent / unrecorded</div>
+      </div>
+    </section>
+
+    <!-- Table Panel -->
+    <section class="table-panel">
+      <div class="table-toolbar-row">
+        <div class="table-toolbar-title">
+          <i class="fa-solid fa-table-list" style="color: var(--primary);"></i>
+          Archived Session Records
+        </div>
+        <div class="table-controls">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="hist-table-search" placeholder="Search name, USN, dept...">
+          </div>
+          <select id="hist-status-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Statuses</option>
+            <option value="PRESENT">Present</option>
+            <option value="EXITED">Exited</option>
+            <option value="NOT SCANNED">Not Scanned</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="responsive-table-holder">
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Member Name</th>
+              <th>Department</th>
+              <th>USN</th>
+              <th>In Time</th>
+              <th>Out Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                Select a date above and click "Load Attendance".
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="institutional-footer">
+    <div>
+      <strong>SRINIVAS INSTITUTE OF TECHNOLOGY</strong> &bull; Valachil, Mangaluru
+    </div>
+    <div>
+      <strong>TechBots</strong> &bull; RFID Attendance System
+    </div>
+  </footer>
+
+  <script src="js/history.js"></script>
+</body>
+</html>

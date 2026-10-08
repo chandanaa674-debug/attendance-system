@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots RFID Attendance System</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Institutional Header & Branding Bar -->
+  <header class="header-wrapper">
+    <div class="top-branding-bar">
+      <a href="index.html" class="institution-group">
+        <div class="institution-logo-shield">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="institution-text-block">
+          <span class="college-name">SRINIVAS INSTITUTE OF TECHNOLOGY</span>
+          <span class="college-location">Valachil, Mangaluru</span>
+          <div class="club-branding-badge-container">
+            <span class="club-tag">TechBots</span>
+            <span class="system-title-tag">RFID ATTENDANCE SYSTEM</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-status-info">
+        <div class="status-indicator-pill">
+          <span class="status-dot"></span>
+          <span>System Active</span>
+        </div>
+        <div class="live-clock-pill" id="live-clock">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html" class="nav-menu-item active">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="members.html" class="nav-menu-item">
+            <i class="fa-solid fa-users"></i> Members
+          </a>
+        </li>
+        <li>
+          <a href="attendance.html" class="nav-menu-item">
+            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+          </a>
+        </li>
+        <li>
+          <a href="history.html" class="nav-menu-item">
+            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-main-heading">Attendance Overview</h1>
+        <p class="page-sub-heading" id="current-date-display">Live RFID access tracking & club attendance records</p>
+      </div>
+      <div>
+        <button class="btn-secondary" id="btn-manual-refresh">
+          <i class="fa-solid fa-arrows-rotate"></i> Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Total Members</span>
+          <i class="fa-solid fa-users kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="stat-total">0</div>
+        <div class="kpi-caption">Registered in club roster</div>
+      </div>
+
+      <div class="kpi-card present">
+        <div class="kpi-header">
+          <span class="kpi-title">Present</span>
+          <i class="fa-solid fa-door-open kpi-icon" style="color: #059669;"></i>
+        </div>
+        <div class="kpi-value" id="stat-present">0</div>
+        <div class="kpi-caption">Scanned IN for session</div>
+      </div>
+
+      <div class="kpi-card exited">
+        <div class="kpi-header">
+          <span class="kpi-title">Exited</span>
+          <i class="fa-solid fa-door-closed kpi-icon" style="color: #d97706;"></i>
+        </div>
+        <div class="kpi-value" id="stat-exited">0</div>
+        <div class="kpi-caption">Scanned OUT of session</div>
+      </div>
+
+      <div class="kpi-card not-scanned">
+        <div class="kpi-header">
+          <span class="kpi-title">Not Scanned</span>
+          <i class="fa-solid fa-user-clock kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="stat-not-scanned">0</div>
+        <div class="kpi-caption">Pending check-in</div>
+      </div>
+    </section>
+
+    <!-- Interactive Panels: Scan Simulator + Latest Activity -->
+    <div class="dashboard-actions-grid">
+      <!-- RFID Scan Simulator Card -->
+      <section class="panel-card">
+        <div class="panel-card-header">
+          <h2 class="panel-card-title">
+            <i class="fa-solid fa-id-card-clip" style="color: var(--primary);"></i>
+            RFID Card Simulation
+          </h2>
+          <span class="dept-badge">ESP32 Ready</span>
+        </div>
+        <p class="panel-card-caption">
+          Select a member to simulate an RFID card tap. 1st tap records <strong>ENTRY</strong>; 2nd tap records <strong>EXIT</strong>.
+        </p>
+
+        <form id="rfid-scan-form" class="scan-form-stack" onsubmit="return false;">
+          <div class="form-field-group" id="dropdown-group">
+            <div class="form-label-row">
+              <label for="member-select">Select Club Member (Simulated RFID Tag)</label>
+              <button type="button" class="btn-link-action" id="btn-toggle-manual">Manual USN Input</button>
+            </div>
+            <select id="member-select" class="select-input">
+              <option value="">-- Choose Member to Tap Card --</option>
+            </select>
+          </div>
+
+          <div class="form-field-group" id="manual-group" style="display: none;">
+            <div class="form-label-row">
+              <label for="manual-identifier">USN or Custom Card UID</label>
+              <button type="button" class="btn-link-action" id="btn-toggle-dropdown">Back to Dropdown</button>
+            </div>
+            <input type="text" id="manual-identifier" class="text-input" placeholder="e.g. 4SN25CS002 or UNREGISTERED_TAG">
+          </div>
+
+          <div>
+            <button type="button" id="btn-scan-card" class="btn-primary-scan" style="width: 100%;">
+              <i class="fa-solid fa-wifi"></i> SCAN CARD
+            </button>
+          </div>
+        </form>
+
+        <!-- Notification Bar -->
+        <div id="scan-alert-box" class="scan-notification-bar">
+          <i id="scan-alert-icon" class="fa-solid fa-circle-check"></i>
+          <span id="scan-alert-text">Ready to scan.</span>
+        </div>
+      </section>
+
+      <!-- Latest Scan Activity Card -->
+      <section class="panel-card">
+        <div class="panel-card-header">
+          <h2 class="panel-card-title">
+            <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary);"></i>
+            Latest Scan Activity
+          </h2>
+        </div>
+
+        <div id="latest-scan-container" class="latest-activity-box">
+          <div class="activity-empty-state">
+            <i class="fa-regular fa-id-badge"></i>
+            <p style="font-weight: 500;">No scans yet</p>
+            <span style="font-size: 0.8rem; color: var(--text-dim);">Tap a card to view recent access activity</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Today's Attendance Table -->
+    <section class="table-panel">
+      <div class="table-toolbar-row">
+        <div class="table-toolbar-title">
+          <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+          Today's Attendance Roster
+        </div>
+        <div class="table-controls">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="table-search" placeholder="Search by name, USN, dept...">
+          </div>
+          <select id="status-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Statuses</option>
+            <option value="PRESENT">Present</option>
+            <option value="EXITED">Exited</option>
+            <option value="NOT SCANNED">Not Scanned</option>
+          </select>
+          <a href="/api/attendance/export" class="btn-secondary btn-export-excel" id="btn-export-today" download>
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+          </a>
+        </div>
+      </div>
+
+      <div class="responsive-table-holder">
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th>Member Name</th>
+              <th>Department</th>
+              <th>USN</th>
+              <th>In Time</th>
+              <th>Out Time</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="attendance-table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                Loading attendance records...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="institutional-footer">
+    <div>
+      <strong>SRINIVAS INSTITUTE OF TECHNOLOGY</strong> &bull; Valachil, Mangaluru
+    </div>
+    <div>
+      <strong>TechBots</strong> &bull; RFID Attendance System
+    </div>
+  </footer>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

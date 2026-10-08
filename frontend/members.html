@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots - Members Directory</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Institutional Header & Branding Bar -->
+  <header class="header-wrapper">
+    <div class="top-branding-bar">
+      <a href="index.html" class="institution-group">
+        <div class="institution-logo-shield">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="institution-text-block">
+          <span class="college-name">SRINIVAS INSTITUTE OF TECHNOLOGY</span>
+          <span class="college-location">Valachil, Mangaluru</span>
+          <div class="club-branding-badge-container">
+            <span class="club-tag">TechBots</span>
+            <span class="system-title-tag">RFID ATTENDANCE SYSTEM</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-status-info">
+        <div class="status-indicator-pill">
+          <span class="status-dot"></span>
+          <span>System Active</span>
+        </div>
+        <div class="live-clock-pill" id="live-clock">--:--:--</div>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="members.html" class="nav-menu-item active">
+            <i class="fa-solid fa-users"></i> Members
+          </a>
+        </li>
+        <li>
+          <a href="attendance.html" class="nav-menu-item">
+            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+          </a>
+        </li>
+        <li>
+          <a href="history.html" class="nav-menu-item">
+            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-main-heading">Club Members Directory</h1>
+        <p class="page-sub-heading">Master club member roster loaded from <code style="color: var(--primary); font-family: var(--font-mono); font-size: 0.82rem;">data/club_members.xlsx</code></p>
+      </div>
+      <div>
+        <a href="index.html" class="btn-primary-scan" style="text-decoration: none;">
+          <i class="fa-solid fa-wifi"></i> Open Scanner
+        </a>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <section class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Total Registered</span>
+          <i class="fa-solid fa-address-book kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="member-total-count">0</div>
+        <div class="kpi-caption">Verified in club Excel</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Departments</span>
+          <i class="fa-solid fa-building-columns kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="member-dept-count">0</div>
+        <div class="kpi-caption">Academic departments</div>
+      </div>
+
+      <div class="kpi-card present">
+        <div class="kpi-header">
+          <span class="kpi-title">Scanned Today</span>
+          <i class="fa-solid fa-user-check kpi-icon" style="color: #059669;"></i>
+        </div>
+        <div class="kpi-value" id="member-active-today">0</div>
+        <div class="kpi-caption">Present or exited</div>
+      </div>
+    </section>
+
+    <!-- Table Panel -->
+    <section class="table-panel">
+      <div class="table-toolbar-row">
+        <div class="table-toolbar-title">
+          <i class="fa-solid fa-users" style="color: var(--primary);"></i>
+          TechBots Member List
+        </div>
+        <div class="table-controls">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="member-search" placeholder="Search by name, USN, dept...">
+          </div>
+          <select id="member-dept-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Departments</option>
+          </select>
+          <button class="btn-secondary" id="btn-refresh-members">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="responsive-table-holder">
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Member Name</th>
+              <th>Department</th>
+              <th>Simulated RFID UID (USN)</th>
+              <th>Today's Status</th>
+              <th>Simulate Scan</th>
+            </tr>
+          </thead>
+          <tbody id="members-table-body">
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                Loading registered members...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="institutional-footer">
+    <div>
+      <strong>SRINIVAS INSTITUTE OF TECHNOLOGY</strong> &bull; Valachil, Mangaluru
+    </div>
+    <div>
+      <strong>TechBots</strong> &bull; RFID Attendance System
+    </div>
+  </footer>
+
+  <script src="js/members.js"></script>
+</body>
+</html>
