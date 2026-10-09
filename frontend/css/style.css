@@ -67,6 +67,13 @@
   --transition: all 0.15s ease-in-out;
 }
 
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -82,6 +89,15 @@ body {
   display: flex;
   flex-direction: column;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
+  position: relative;
+}
+
+img, svg {
+  max-width: 100%;
+  height: auto;
 }
 
 /* ==========================================================================
@@ -207,6 +223,33 @@ body {
   border: 1px solid var(--border);
   padding: 0.35rem 0.75rem;
   border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* Mobile Navigation Hamburger Toggle Button */
+.mobile-nav-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-main);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.mobile-nav-toggle:hover,
+.mobile-nav-toggle:focus-visible {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary-border);
+  outline: none;
 }
 
 /* Navigation Sub-Bar */
@@ -281,6 +324,13 @@ body {
   font-size: 0.88rem;
   color: var(--text-muted);
   margin-top: 0.15rem;
+}
+
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
 }
 
 /* ==========================================================================
@@ -688,10 +738,29 @@ body {
 .responsive-table-holder {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.responsive-table-holder::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsive-table-holder::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.responsive-table-holder::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+
+.responsive-table-holder::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
 .roster-table {
   width: 100%;
+  min-width: 620px;
   border-collapse: collapse;
   text-align: left;
 }
@@ -732,6 +801,7 @@ body {
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .dept-badge {
@@ -870,33 +940,436 @@ body {
   color: var(--text-main);
 }
 
-/* Mobile & Tablet Responsiveness */
-@media (max-width: 840px) {
+/* ==========================================================================
+   Responsive Architecture & Device Breakpoints
+   Supports:
+   - Mobile phones (Android and iPhone: 320px, 375px, 425px)
+   - Tablets & iPads (768px, 1024px)
+   - Laptops (1366px)
+   - Desktop & Monitors (1920px)
+   ========================================================================== */
+
+@keyframes navSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tablets Landscape & Small Laptops (<= 1024px) */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 1.5rem 1.5rem;
+  }
+  .dashboard-actions-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablets Portrait & Large Mobile Devices (<= 768px) */
+@media (max-width: 768px) {
+  .mobile-nav-toggle {
+    display: inline-flex;
+  }
+
   .top-branding-bar {
     padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .institution-group {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .header-status-info {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-bar {
+    padding: 0;
+    border-bottom: none;
+    background: transparent;
+  }
+
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    padding: 0.5rem 1rem 0.75rem;
+    background: #ffffff;
+    border-top: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    gap: 0.35rem;
+  }
+
+  .nav-menu.open {
+    display: flex;
+    animation: navSlideDown 0.18s ease-out;
+  }
+
+  .nav-menu-item {
+    width: 100%;
+    border-bottom: none;
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    padding: 0.75rem 1rem;
+    font-size: 0.92rem;
+  }
+
+  .nav-menu-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .container {
+    padding: 1.25rem 1rem;
+  }
+
+  .page-header-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.75rem;
   }
+
+  .page-main-heading {
+    font-size: 1.35rem;
+  }
+
+  /* KPI Grid: Clean 2-column grid for tablets and phones */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem;
+  }
+
+  .kpi-card {
+    padding: 1rem 1.15rem;
+  }
+
+  .kpi-value {
+    font-size: 1.65rem;
+  }
+
+  /* Panels */
+  .panel-card {
+    padding: 1.25rem;
+  }
+
+  /* Table Toolbar & Filter Controls */
+  .table-toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .table-controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .search-input-wrapper {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .search-input-wrapper input {
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .table-controls > select,
+  .table-controls > .select-input {
+    width: 100% !important;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .table-controls > .btn-secondary,
+  .table-controls > a.btn-secondary {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 0.88rem;
+  }
+
+  /* History Date Strip */
+  .history-filter-strip {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    padding: 0.85rem 1rem;
+  }
+
+  .date-selector-field {
+    width: 100%;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .history-filter-strip > div {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .history-filter-strip button,
+  .history-filter-strip a {
+    width: 100%;
+    min-height: 44px;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .institutional-footer {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.15rem 1rem;
+    gap: 0.5rem;
+  }
+}
+
+/* Standard Mobile Phones (<= 480px, e.g. 375px, 414px, 425px) */
+@media (max-width: 480px) {
+  .top-branding-bar {
+    padding: 0.65rem 0.75rem;
+    gap: 0.65rem;
+  }
+
+  .institution-group {
+    gap: 0.65rem;
+  }
+
+  .institution-logo-shield {
+    width: 38px;
+    height: 38px;
+    font-size: 1.15rem;
+    border-radius: var(--radius-sm);
+  }
+
+  .college-name {
+    font-size: 0.92rem;
+    line-height: 1.2;
+  }
+
+  .college-location {
+    font-size: 0.74rem;
+  }
+
+  .club-branding-badge-container {
+    gap: 0.45rem;
+    margin-top: 0.15rem;
+    flex-wrap: wrap;
+  }
+
+  .club-tag, .system-title-tag {
+    font-size: 0.68rem;
+  }
+
   .header-status-info {
     width: 100%;
     justify-content: space-between;
   }
-  .nav-bar {
-    padding: 0 1rem;
-    overflow-x: auto;
+
+  .status-indicator-pill,
+  .live-clock-pill {
+    font-size: 0.74rem;
+    padding: 0.25rem 0.55rem;
   }
+
   .container {
-    padding: 1.25rem 1rem;
+    padding: 0.95rem 0.75rem;
   }
-  .table-toolbar-row {
-    flex-direction: column;
-    align-items: stretch;
+
+  .page-main-heading {
+    font-size: 1.25rem;
   }
-  .search-input-wrapper {
-    min-width: 100%;
+
+  .page-sub-heading {
+    font-size: 0.82rem;
   }
-  .institutional-footer {
-    flex-direction: column;
-    text-align: center;
+
+  .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    min-height: 44px;
+    font-size: 0.85rem;
+  }
+
+  /* Compact 2x2 KPI metrics */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.6rem;
+  }
+
+  .kpi-card {
+    padding: 0.85rem 0.95rem;
+  }
+
+  .kpi-title {
+    font-size: 0.72rem;
+  }
+
+  .kpi-value {
+    font-size: 1.5rem;
+  }
+
+  .kpi-caption {
+    font-size: 0.72rem;
+  }
+
+  .panel-card {
+    padding: 1rem 0.85rem;
+  }
+
+  .panel-card-title {
+    font-size: 0.98rem;
+  }
+
+  .panel-card-caption {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-label-row {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+
+  .select-input,
+  .text-input,
+  .date-selector-field {
+    font-size: 16px;
+    min-height: 44px;
+    padding: 0.65rem 0.75rem;
+  }
+
+  .btn-primary-scan {
+    min-height: 46px;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  .scan-notification-bar {
+    font-size: 0.82rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  .activity-meta-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .meta-field-label {
+    font-size: 0.68rem;
+  }
+
+  .meta-field-value {
+    font-size: 0.84rem;
+    word-break: break-all;
+    overflow-wrap: break-word;
+  }
+
+  .roster-table {
+    min-width: 580px;
+  }
+
+  .roster-table th,
+  .roster-table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .usn-text-tag {
+    font-size: 0.76rem;
+    padding: 0.15rem 0.4rem;
+  }
+
+  .dept-badge {
+    font-size: 0.72rem;
+    padding: 0.12rem 0.4rem;
+  }
+
+  .status-pill {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
+  }
+}
+
+/* Ultra-Compact Mobile Phones (<= 340px, e.g. 320px iPhone SE) */
+@media (max-width: 340px) {
+  .top-branding-bar {
+    padding: 0.5rem 0.55rem;
+    gap: 0.5rem;
+  }
+
+  .institution-logo-shield {
+    width: 34px;
+    height: 34px;
+    font-size: 1.05rem;
+  }
+
+  .college-name {
+    font-size: 0.84rem;
+  }
+
+  .college-location {
+    font-size: 0.7rem;
+  }
+
+  .club-tag, .system-title-tag {
+    font-size: 0.64rem;
+  }
+
+  .status-indicator-pill,
+  .live-clock-pill {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.45rem;
+  }
+
+  .container {
+    padding: 0.75rem 0.55rem;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.45rem;
+  }
+
+  .kpi-card {
+    padding: 0.75rem 0.65rem;
+  }
+
+  .kpi-title {
+    font-size: 0.66rem;
+  }
+
+  .kpi-value {
+    font-size: 1.35rem;
+  }
+
+  .kpi-caption {
+    font-size: 0.66rem;
+  }
+
+  .roster-table {
+    min-width: 550px;
+  }
+
+  .roster-table th,
+  .roster-table td {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.8rem;
   }
 }
