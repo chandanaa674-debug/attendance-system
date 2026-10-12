@@ -1,207 +1,138 @@
 # SRINIVAS INSTITUTE OF TECHNOLOGY | Valachil, Mangaluru
-## TechBots — RFID ATTENDANCE SYSTEM
+## TechBots — RFID ATTENDANCE MANAGEMENT SYSTEM
 
-A complete, clean, and institutional **Club RFID Attendance Management System** built with Python (Flask) and a professional light-themed responsive Vanilla HTML5/CSS3/JavaScript dashboard.
+An institutional-grade, full-stack **RFID Attendance Management System** built for the **TechBots** club at **Srinivas Institute of Technology, Valachil, Mangaluru, Karnataka**.
 
-Designed specifically for college clubs and IoT projects to demonstrate card tapping, entry/exit timestamping, and real-time dashboard analytics, with direct architectural compatibility for later integration with **ESP32 + RC522 RFID** hardware.
-
----
-
-## 1. Project Overview
-
-- **Master Data Source**: Loaded from `data/club_members.xlsx`.
-- **Zero-Corruption Demo Mode**: Keeps the master club member list safe and intact, recording session logs cleanly in `data/attendance_records.xlsx` (with automatic backup `club_members_backup.xlsx`).
-- **Simulated RFID Workflow**: Uses student **USN** as the simulated RFID UID for the demo phase.
-- **Dynamic Entry/Exit Logic**:
-  - **1st Tap (Entry)**: Records `In Time`, sets status to `PRESENT`.
-  - **2nd Tap (Exit)**: Records `Out Time`, updates status to `EXITED`.
-  - **3rd Tap**: Informs the user that attendance has already been completed for today.
-  - **Unregistered Tag**: Rejects unknown cards with a warning (`Unknown / Unregistered Member`).
-- **Hardware-Ready Architecture**: When the ESP32 is deployed, it sends HTTP POST requests to the exact same `/api/rfid/scan` endpoint.
+Connects the existing club Excel data with senior-developed **ESP32 + RC522 RFID hardware**, a secure Python Flask REST backend, real-time responsive web dashboard, administrator portal, and attendance export tools.
 
 ---
 
-## 2. Project Structure
+## 1. System Features
+
+- **Existing Excel Compatibility**: Safely reads and updates `data/club_members.xlsx` and `data/attendance_records.xlsx` without overwriting historical attendance records or corrupting rows.
+- **Timestamped Auto-Backups**: Automatically generates backups in `data/backups/` before any modifying operation.
+- **Asia/Kolkata Timezone Support**: Configured for Mangaluru (`Asia/Kolkata`) with formatted 12-hour timestamps (`08:00 PM`).
+- **State-Machine Attendance Rules**:
+  - **1st Tap**: Marks **Present** and records `In Time`.
+  - **2nd Tap**: Marks **Left** and records `Exit Time`.
+  - **3rd Tap**: Informs that attendance is already completed for today without modifying original in/out times.
+- **Hardware Debounce Protection**: 15-second cooldown timer prevents duplicate attendance events from accidental double taps.
+- **Unknown Card Rejection**: Unknown RFID cards are rejected safely with a 404 response without creating false member entries.
+- **Administrator Console (`/login.html`)**:
+  - Secure password hashing with PBKDF2/SHA256 and JWT session authentication.
+  - Member management: Add, Edit, Delete, and assign physical RFID UIDs.
+  - Duplicate detection for USNs and RFID UIDs.
+  - Safe Excel import with duplicate skipping.
+  - One-click workbook backup download.
+- **Multi-Date Reports & Analytics (`/reports.html`)**:
+  - Date-range filtering, department breakdowns, and turnout percentage.
+  - Export filtered attendance data as **Excel (.xlsx)** or **CSV**.
+- **Hardware-Ready ESP32 Firmware**: Tested Arduino C++ sketch in `esp32/techbots_esp32_rfid.ino` with WiFi reconnect, buzzer feedback, and `X-API-Key` authentication.
+
+---
+
+## 2. Project Organization
 
 ```
-club-rfid-attendance/
-│
+attendance-system/
 ├── backend/
-│   ├── app.py                   # Main Flask REST server and static page router
-│   ├── excel_handler.py         # Safe Excel I/O with whitespace & USN normalization
-│   ├── attendance_service.py    # Entry/Exit state machine and attendance analytics
-│   ├── config.py                # Server, paths, and status configurations
+│   ├── app.py                   # Flask REST server & routing
+│   ├── attendance_service.py    # Attendance state machine & analytics
+│   ├── auth.py                  # Admin password hashing & JWT auth
+│   ├── config.py                # System & timezone configurations
+│   ├── excel_handler.py         # Safe Excel I/O with backups & normalization
 │   └── requirements.txt         # Python dependencies
-│
 ├── data/
-│   ├── club_members.xlsx        # Original uploaded club members roster (read-only)
-│   ├── club_members_backup.xlsx # Automatic backup of the original file
-│   └── attendance_records.xlsx  # Multi-day attendance logs
-│
+│   ├── club_members.xlsx        # Master registered club roster
+│   ├── club_members_backup.xlsx # Original master backup
+│   ├── attendance_records.xlsx  # Multi-day attendance records
+│   └── backups/                 # Auto-generated timestamped backups
+├── esp32/
+│   ├── techbots_esp32_rfid.ino  # Production ESP32 Arduino C++ firmware
+│   └── README.md                # Pinout wiring & hardware setup
 ├── frontend/
-│   ├── index.html               # Main Executive Dashboard & RFID Simulator
-│   ├── members.html             # Club Members Directory with search & filters
-│   ├── attendance.html          # Today's live attendance session with status badges
-│   ├── history.html             # Multi-date attendance archive with date picker
-│   │
+│   ├── index.html               # Live Dashboard & RFID Card Simulator
+│   ├── login.html               # Admin Login Portal
+│   ├── members.html             # Member Directory & Admin Management
+│   ├── attendance.html          # Today's Live Attendance Session
+│   ├── reports.html             # Reports, Archive, & Multi-date Analytics
 │   ├── css/
-│   │   └── style.css            # Custom modern CSS design system (glassmorphism)
-│   │
+│   │   └── style.css            # Responsive institutional UI design system
 │   └── js/
-│       ├── dashboard.js         # Real-time dashboard controller & simulator handler
-│       ├── members.js           # Members page controller
-│       ├── attendance.js        # Live attendance page controller
-│       └── history.js           # Attendance history page controller
-│
-├── .gitignore
-└── README.md
+│       ├── dashboard.js         # Real-time polling & simulation
+│       ├── members.js           # Member CRUD & duplicate checks
+│       ├── attendance.js        # Today's session controller
+│       ├── reports.js           # Multi-date reports & exports
+│       └── navigation.js        # Mobile drawer navigation
+├── tests/
+│   └── test_attendance.py       # 12 automated pytest unit & integration tests
+├── .env.example                 # Environment variables template
+├── .gitignore                   # Ignores .env and temporary files
+├── Dockerfile                   # Production Docker container definition
+├── Procfile                     # Gunicorn WSGI start command
+├── render.yaml                  # Render Cloud blueprint
+├── vercel.json                  # Vercel serverless deployment config
+├── wsgi.py                      # WSGI entrypoint
+├── DEPLOYMENT.md                # Comprehensive deployment guide
+└── README.md                    # System documentation
 ```
 
 ---
 
-## 3. Technology Stack
-
-- **Backend**: Python 3.10+, Flask, pandas, openpyxl, Flask-CORS
-- **Frontend**: HTML5, CSS3 (Modern Glassmorphism & Micro-animations), Vanilla JavaScript (ES6+)
-- **Storage / Data Layer**: Microsoft Excel (`.xlsx`) via pandas and openpyxl
-
----
-
-## 4. Installation
-
-Open your terminal or PowerShell and install the required dependencies:
-
-```bash
-cd backend
-pip install -r requirements.txt
-```
-
-*Required packages include: `Flask`, `Flask-Cors`, `pandas`, `openpyxl`.*
-
----
-
-## 5. How to Start Flask
-
-From the project root:
+## 3. Quick Start (Local Development)
 
 ```powershell
+# 1. Install dependencies
+pip install -r requirements.txt
+
+# 2. Run backend
 python backend/app.py
 ```
 
-Or from inside the `backend` folder:
+Open your browser at:
+- **Dashboard**: `http://localhost:5000/`
+- **Members**: `http://localhost:5000/members`
+- **Attendance**: `http://localhost:5000/attendance`
+- **Reports**: `http://localhost:5000/reports`
+- **Settings**: `http://localhost:5000/settings`
+- **Admin Login**: `http://localhost:5000/login`
 
+Default Admin Credentials:
+- **Username**: `admin`
+- **Password**: `TechBots@SIT2026`
+
+---
+
+## 4. REST API Endpoints
+
+| Method | Endpoint | Description | Auth |
+|---|---|---|---|
+| `GET` | `/api/health` | Diagnostic health check & timezone info | Public |
+| `GET` | `/api/settings` | System configuration, storage & hardware details | Public |
+| `PUT` | `/api/settings` | Update rules & debounce cooldown | Admin Required |
+| `POST` | `/api/settings/backup_now` | Immediate timestamped Excel backup snapshot | Admin Required |
+| `POST` | `/api/auth/login` | Admin login, returns JWT token | Public |
+| `GET` | `/api/auth/me` | Validates active admin session | Bearer Token |
+| `GET` | `/api/dashboard` | Live metrics, latest scan, & roster | Public |
+| `GET` | `/api/attendance/today` | Today's session records with status | Public |
+| `GET` | `/api/attendance/history` | Historical logs for date / date-range | Public |
+| `POST` / `GET` | `/api/attendance/scan` | RFID tap scan (supports USN or Card UID) | `X-API-Key` / Simulator |
+| `GET` | `/api/members` | Full member list with department/branch filter | Public |
+| `POST` | `/api/members` | Register new member | Admin Required |
+| `PUT` | `/api/members/<usn>` | Edit member or assign RFID UID | Admin Required |
+| `DELETE` | `/api/members/<usn>` | Delete member from roster | Admin Required |
+| `GET` | `/api/members/duplicates` | Check for duplicate USNs or RFID UIDs | Admin Required |
+| `POST` | `/api/members/import` | Upload Excel (.xlsx) member roster | Admin Required |
+| `GET` | `/api/members/backup` | Download latest Excel workbook backup | Admin Required |
+| `GET` | `/api/reports/attendance` | Multi-date, department, & branch analytics | Public |
+| `GET` | `/api/attendance/export` | Download filtered logs (.xlsx or .csv) | Public |
+
+---
+
+## 5. Automated Tests
+
+Run the comprehensive test suite using pytest:
 ```powershell
-cd backend
-python app.py
+pytest -v tests/test_attendance.py
 ```
-
-The Flask server will boot on `http://localhost:5000` (and `http://0.0.0.0:5000` to allow local network connections from an ESP32 microcontroller).
-
----
-
-## 6. How to Open the Website
-
-Once the backend is running, open any modern web browser and navigate to:
-
-```
-http://localhost:5000
-```
-
-Available navigation pages:
-- **Dashboard**: `http://localhost:5000/` or `http://localhost:5000/index.html`
-- **Members**: `http://localhost:5000/members` or `http://localhost:5000/members.html`
-- **Today's Attendance**: `http://localhost:5000/attendance` or `http://localhost:5000/attendance.html`
-- **Attendance History**: `http://localhost:5000/history` or `http://localhost:5000/history.html`
-
-*(Note: Thanks to Flask-CORS, you can also open `frontend/index.html` directly in your browser or with VS Code Live Server if preferred).*
-
----
-
-## 7. Excel File Location & Safety Architecture
-
-- **Master File**: `data/club_members.xlsx`
-  - Columns: `Date`, `Name`, `Department`, `USN`, `In Time`, `Out Time`, `Status`.
-  - Rows 2–10 contain the club members (e.g. `Ananya udupi`, `Rakshitha`, `Adarsh`, etc.).
-- **Automatic Backup**: `data/club_members_backup.xlsx`.
-- **Session Attendance File**: `data/attendance_records.xlsx`
-  - Columns: `Date`, `Name`, `Department`, `USN`, `In Time`, `Out Time`, `Status`.
-- **Why Separate Attendance Logging?**
-  - Mixing single-member profile records with multi-day attendance records in a single sheet would overwrite previous days' attendance logs or duplicate member roster records.
-  - Using `data/attendance_records.xlsx` preserves `club_members.xlsx` as a clean, read-only master roster while allowing full historical session logs across multiple dates.
-  - A configurable toggle `SYNC_TO_MASTER_EXCEL` is also available in `backend/config.py` if single-file synchronization is ever required.
-
----
-
-## 8. REST API Endpoints
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/dashboard` | Aggregated counters, latest scan details, and today's roster. |
-| `GET` | `/api/members` | Full list of registered members loaded from Excel. |
-| `GET` | `/api/member/<usn>` | Lookup specific member by USN. |
-| `GET` | `/api/attendance/today` | Current date attendance logs with status badges. |
-| `GET` | `/api/attendance/history?date=YYYY-MM-DD` | Attendance records for a specific date. |
-| `POST` | `/api/rfid/scan` | Simulates or processes an RFID scan (`{ "identifier": "USN" }`). |
-| `GET` | `/api/attendance/export?date=YYYY-MM-DD` | Downloads formatted Excel file of attendance. |
-
----
-
-## 9. How Simulated RFID Scanning Works
-
-1. On the **Dashboard**, look at the **Simulate RFID Card Scan** card.
-2. Select any member from the dropdown (e.g., `Ananya udupi - USN: 4SN25CS002`).
-3. Click **SCAN CARD**:
-   - The frontend sends:
-     ```json
-     POST /api/rfid/scan
-     {
-       "identifier": "4SN25CS002"
-     }
-     ```
-   - **First Tap**: Backend records `In Time` (e.g. `09:15 AM`) and sets status to `PRESENT`.
-   - **Second Tap**: Backend detects existing `In Time`, records `Out Time` (e.g. `12:30 PM`), and sets status to `EXITED`.
-   - **Third Tap**: Backend alerts that attendance has already been completed for today.
-4. You can also click **Enter Custom USN** to test unregistered tags (e.g., `INVALID999`) to verify the "Unknown / Unregistered Member" warning.
-
----
-
-## 10. How to Replace Simulated Scanning with ESP32 Later
-
-When the seniors' ESP32 + RC522 RFID reader is ready to be connected:
-
-1. **Keep the Backend API Untouched**:
-   The ESP32 will make an HTTP POST request to the exact same route:
-   ```
-   POST http://<SERVER_IP>:5000/api/rfid/scan
-   Content-Type: application/json
-   
-   {
-     "identifier": "<SCANNED_RFID_UID_OR_USN>"
-   }
-   ```
-2. **RFID UID Mapping**:
-   - In `club_members.xlsx` or via an added `RFID_UID` column, map the physical card hex UID (e.g. `A3 5F 8C 12`) to the member's record.
-   - In `backend/excel_handler.py`, simply check `member.get("rfid_uid") == target_key or member.get("usn") == target_key`.
-3. **Sample ESP32 Arduino C++ Snippet**:
-   ```cpp
-   #include <WiFi.h>
-   #include <HTTPClient.h>
-
-   void sendRFIDScan(String cardUID) {
-     if (WiFi.status() == WL_CONNECTED) {
-       HTTPClient http;
-       http.begin("http://192.168.1.100:5000/api/rfid/scan"); // Replace with PC IP
-       http.addHeader("Content-Type", "application/json");
-
-       String payload = "{\"identifier\":\"" + cardUID + "\"}";
-       int httpResponseCode = http.POST(payload);
-
-       if (httpResponseCode > 0) {
-         String response = http.getString();
-         Serial.println("Response: " + response);
-       }
-       http.end();
-     }
-   }
-   ```
-4. No frontend changes are necessary; the dashboard's background polling will immediately display live card taps executed at the physical gate!
+All 17 automated unit and integration tests pass cleanly in ~1.5s with isolated workbook sandboxing.

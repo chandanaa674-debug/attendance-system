@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots - Members Directory</title>
+  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots - Member Management</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -32,6 +32,9 @@
           <span>System Active</span>
         </div>
         <div class="live-clock-pill" id="live-clock">--:--:--</div>
+        <div id="auth-header-slot">
+          <a href="login.html" class="btn-header-auth"><i class="fa-solid fa-lock"></i> Admin</a>
+        </div>
         <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <i class="fa-solid fa-bars"></i>
         </button>
@@ -53,33 +56,58 @@
         </li>
         <li>
           <a href="attendance.html" class="nav-menu-item">
-            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+            <i class="fa-solid fa-clipboard-check"></i> Attendance
           </a>
         </li>
         <li>
-          <a href="history.html" class="nav-menu-item">
-            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          <a href="reports.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-pie"></i> Reports
+          </a>
+        </li>
+        <li>
+          <a href="settings.html" class="nav-menu-item">
+            <i class="fa-solid fa-gear"></i> Settings
+          </a>
+        </li>
+        <li>
+          <a href="login.html" id="nav-item-auth" class="nav-menu-item">
+            <i class="fa-solid fa-lock"></i> Login
           </a>
         </li>
       </ul>
     </nav>
   </header>
 
-  <!-- Main Content Container -->
+  <!-- Main Container -->
   <main class="container">
     <div class="page-header-row">
       <div>
-        <h1 class="page-main-heading">Club Members Directory</h1>
-        <p class="page-sub-heading">Master club member roster loaded from <code style="color: var(--primary); font-family: var(--font-mono); font-size: 0.82rem;">data/club_members.xlsx</code></p>
+        <h1 class="page-main-heading">Club Member Directory & Management</h1>
+        <p class="page-sub-heading">Master club roster linked to <code style="color: var(--primary); font-family: var(--font-mono); font-size: 0.82rem;">data/club_members.xlsx</code></p>
       </div>
-      <div>
-        <a href="index.html" class="btn-primary-scan" style="text-decoration: none;">
-          <i class="fa-solid fa-wifi"></i> Open Scanner
-        </a>
+      <div class="page-header-actions" id="admin-action-buttons">
+        <!-- Injected dynamically based on admin login state -->
       </div>
     </div>
 
-    <!-- KPI Cards -->
+    <!-- Admin Status Banner (if not logged in) -->
+    <div id="visitor-mode-banner" class="panel-card" style="margin-bottom: 1.25rem; padding: 0.85rem 1.25rem; background: #eff6ff; border-color: var(--primary-border); display: flex; align-items: center; justify-content: space-between;">
+      <div style="font-size: 0.85rem; color: var(--primary); display: flex; align-items: center; gap: 0.6rem;">
+        <i class="fa-solid fa-shield-halved" style="font-size: 1.1rem;"></i>
+        <span>Viewing member directory in Read-Only mode. Sign in as Administrator to add members, assign RFID tags, or import Excel files.</span>
+      </div>
+      <a href="login.html" class="btn-primary-scan" style="font-size: 0.8rem; padding: 0.4rem 0.85rem; text-decoration: none;">
+        <i class="fa-solid fa-lock"></i> Admin Sign In
+      </a>
+    </div>
+
+    <!-- Duplicate Warning Strip (Hidden by default, shown if duplicates found) -->
+    <div id="duplicate-warning-box" class="duplicate-alert-strip" style="display: none;">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.1rem;"></i>
+      <span id="duplicate-warning-text">Duplicate records detected in member workbook.</span>
+    </div>
+
+    <!-- KPI Summary Cards -->
     <section class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
       <div class="kpi-card">
         <div class="kpi-header">
@@ -92,11 +120,11 @@
 
       <div class="kpi-card">
         <div class="kpi-header">
-          <span class="kpi-title">Departments</span>
-          <i class="fa-solid fa-building-columns kpi-icon"></i>
+          <span class="kpi-title">RFID Cards Assigned</span>
+          <i class="fa-solid fa-id-card kpi-icon" style="color: var(--primary);"></i>
         </div>
-        <div class="kpi-value" id="member-dept-count">0</div>
-        <div class="kpi-caption">Academic departments</div>
+        <div class="kpi-value" id="member-rfid-count">0</div>
+        <div class="kpi-caption">Hardware tags linked</div>
       </div>
 
       <div class="kpi-card present">
@@ -105,7 +133,7 @@
           <i class="fa-solid fa-user-check kpi-icon" style="color: #059669;"></i>
         </div>
         <div class="kpi-value" id="member-active-today">0</div>
-        <div class="kpi-caption">Present or exited</div>
+        <div class="kpi-caption">Present or Left</div>
       </div>
     </section>
 
@@ -114,15 +142,18 @@
       <div class="table-toolbar-row">
         <div class="table-toolbar-title">
           <i class="fa-solid fa-users" style="color: var(--primary);"></i>
-          TechBots Member List
+          TechBots Registered Members
         </div>
         <div class="table-controls">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="member-search" placeholder="Search by name, USN, dept...">
+            <input type="text" id="member-search" placeholder="Search by name, USN, dept, RFID...">
           </div>
           <select id="member-dept-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
             <option value="ALL">All Departments</option>
+          </select>
+          <select id="member-branch-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Branches</option>
           </select>
           <button class="btn-secondary" id="btn-refresh-members">
             <i class="fa-solid fa-arrows-rotate"></i> Refresh
@@ -131,28 +162,155 @@
       </div>
 
       <div class="responsive-table-holder">
-        <table class="roster-table">
+        <table class="roster-table" id="members-roster-table">
           <thead>
             <tr>
-              <th>#</th>
-              <th>Member Name</th>
-              <th>Department</th>
-              <th>Simulated RFID UID (USN)</th>
-              <th>Today's Status</th>
-              <th>Simulate Scan</th>
+              <th data-sort="name" class="sortable">Member Name <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="department" class="sortable">Department <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="branch" class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="usn" class="sortable">USN <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="rfid_uid" class="sortable">RFID Card UID <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="status" class="sortable">Today's Status <i class="fa-solid fa-sort"></i></th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="members-table-body">
             <tr>
-              <td colspan="6" style="text-align: center; color: var(--text-dim); padding: 2rem;">
-                Loading registered members...
+              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading registered members...
               </td>
             </tr>
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Bar -->
+      <div class="table-pagination-bar" id="members-pagination-bar">
+        <div class="page-size-selector">
+          <span>Show:</span>
+          <select id="members-page-size" class="select-input" style="padding: 0.25rem 0.5rem; font-size: 0.82rem;">
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="ALL">All rows</option>
+          </select>
+          <span id="members-pagination-info" style="margin-left: 0.5rem;">Showing 0 of 0 records</span>
+        </div>
+        <div class="pagination-controls" id="members-pagination-controls">
+          <!-- Page buttons injected by members.js -->
+        </div>
+      </div>
     </section>
   </main>
+
+  <!-- Modal 1: Add New Member -->
+  <div id="modal-add-member" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-user-plus" style="color: var(--primary);"></i> Add Club Member</div>
+        <button class="modal-close-btn" data-close="modal-add-member">&times;</button>
+      </div>
+      <form id="form-add-member">
+        <div class="modal-body">
+          <div id="add-member-alert" class="alert-banner" style="display: none;"></div>
+          <div class="form-group">
+            <label for="add-name">Member Full Name *</label>
+            <input type="text" id="add-name" class="form-input" required placeholder="e.g. Ramesh Kumar">
+          </div>
+          <div class="form-group">
+            <label for="add-usn">University Seat Number (USN) *</label>
+            <input type="text" id="add-usn" class="form-input" required placeholder="e.g. 4SN25CS045">
+            <div class="form-help-text">USN must be unique across all college club records.</div>
+          </div>
+          <div class="form-group">
+            <label for="add-dept">Department *</label>
+            <input type="text" id="add-dept" class="form-input" required placeholder="e.g. CSE or EAC">
+          </div>
+          <div class="form-group">
+            <label for="add-branch">Branch (Optional)</label>
+            <input type="text" id="add-branch" class="form-input" placeholder="e.g. Computer Science & Engineering">
+          </div>
+          <div class="form-group">
+            <label for="add-rfid">RFID Card UID (Optional)</label>
+            <input type="text" id="add-rfid" class="form-input" placeholder="e.g. E3A4128B">
+            <div class="form-help-text">Can be assigned now or scanned later via RFID hardware.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modal-add-member">Cancel</button>
+          <button type="submit" class="btn-primary-scan"><i class="fa-solid fa-check"></i> Save Member</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Edit Member / Assign RFID -->
+  <div id="modal-edit-member" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-id-card" style="color: var(--primary);"></i> Edit Member & Assign RFID</div>
+        <button class="modal-close-btn" data-close="modal-edit-member">&times;</button>
+      </div>
+      <form id="form-edit-member">
+        <input type="hidden" id="edit-orig-usn">
+        <div class="modal-body">
+          <div id="edit-member-alert" class="alert-banner" style="display: none;"></div>
+          <div class="form-group">
+            <label for="edit-name">Member Name</label>
+            <input type="text" id="edit-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-usn">USN (Read-Only)</label>
+            <input type="text" id="edit-usn" class="form-input" readonly style="background: #f1f5f9; cursor: not-allowed;">
+          </div>
+          <div class="form-group">
+            <label for="edit-dept">Department</label>
+            <input type="text" id="edit-dept" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-branch">Branch</label>
+            <input type="text" id="edit-branch" class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="edit-rfid">Physical RFID Card UID</label>
+            <input type="text" id="edit-rfid" class="form-input" placeholder="e.g. E3A4128B">
+            <div class="form-help-text">Physical card hex UID from the ESP32 reader.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modal-edit-member">Cancel</button>
+          <button type="submit" class="btn-primary-scan"><i class="fa-solid fa-floppy-disk"></i> Update Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Import Excel Workbook -->
+  <div id="modal-import-excel" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title"><i class="fa-solid fa-file-excel" style="color: #059669;"></i> Import Members from Excel</div>
+        <button class="modal-close-btn" data-close="modal-import-excel">&times;</button>
+      </div>
+      <form id="form-import-excel">
+        <div class="modal-body">
+          <div id="import-alert" class="alert-banner" style="display: none;"></div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Upload an Excel workbook (<code style="color: var(--primary);">.xlsx</code>) containing columns: <strong>Name</strong>, <strong>USN</strong>, and <strong>Department</strong>.
+            Existing members will be preserved and duplicates safely skipped.
+          </p>
+          <div class="form-group">
+            <label for="import-file">Select Excel File (.xlsx)</label>
+            <input type="file" id="import-file" class="form-input" accept=".xlsx, .xls" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" data-close="modal-import-excel">Cancel</button>
+          <button type="submit" id="btn-import-submit" class="btn-primary-scan"><i class="fa-solid fa-cloud-arrow-up"></i> Start Import</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- Institutional Footer -->
   <footer class="institutional-footer">

@@ -32,6 +32,9 @@
           <span>System Active</span>
         </div>
         <div class="live-clock-pill" id="live-clock">--:--:--</div>
+        <div id="auth-header-slot">
+          <a href="login.html" class="btn-header-auth"><i class="fa-solid fa-lock"></i> Admin</a>
+        </div>
         <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <i class="fa-solid fa-bars"></i>
         </button>
@@ -53,12 +56,22 @@
         </li>
         <li>
           <a href="attendance.html" class="nav-menu-item active">
-            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+            <i class="fa-solid fa-clipboard-check"></i> Attendance
           </a>
         </li>
         <li>
-          <a href="history.html" class="nav-menu-item">
-            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          <a href="reports.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-pie"></i> Reports
+          </a>
+        </li>
+        <li>
+          <a href="settings.html" class="nav-menu-item">
+            <i class="fa-solid fa-gear"></i> Settings
+          </a>
+        </li>
+        <li>
+          <a href="login.html" id="nav-item-auth" class="nav-menu-item">
+            <i class="fa-solid fa-lock"></i> Login
           </a>
         </li>
       </ul>
@@ -70,13 +83,16 @@
     <div class="page-header-row">
       <div>
         <h1 class="page-main-heading">Today's Attendance Session</h1>
-        <p class="page-sub-heading" id="attendance-session-date">Live session tracking for TechBots club members</p>
+        <p class="page-sub-heading" id="attendance-session-date">Live session tracking for TechBots club members (Asia/Kolkata)</p>
       </div>
       <div class="page-header-actions">
         <button class="btn-secondary" id="btn-refresh-attendance">
           <i class="fa-solid fa-arrows-rotate"></i> Refresh
         </button>
-        <a href="/api/attendance/export" class="btn-secondary btn-export-excel" id="btn-export-today" download>
+        <a href="/api/attendance/export?format=csv" class="btn-secondary" id="btn-export-today-csv" download>
+          <i class="fa-solid fa-file-csv"></i> Export CSV
+        </a>
+        <a href="/api/attendance/export?format=xlsx" class="btn-secondary btn-export-excel" id="btn-export-today-xlsx" download>
           <i class="fa-solid fa-file-excel"></i> Export Excel
         </a>
       </div>
@@ -95,29 +111,29 @@
 
       <div class="kpi-card present">
         <div class="kpi-header">
-          <span class="kpi-title">Present</span>
+          <span class="kpi-title">Present Now</span>
           <i class="fa-solid fa-door-open kpi-icon" style="color: #059669;"></i>
         </div>
         <div class="kpi-value" id="card-present">0</div>
-        <div class="kpi-caption">Currently in room</div>
+        <div class="kpi-caption">In session</div>
       </div>
 
       <div class="kpi-card exited">
         <div class="kpi-header">
-          <span class="kpi-title">Exited</span>
+          <span class="kpi-title">Members Left</span>
           <i class="fa-solid fa-door-closed kpi-icon" style="color: #d97706;"></i>
         </div>
         <div class="kpi-value" id="card-exited">0</div>
-        <div class="kpi-caption">Completed session exit</div>
+        <div class="kpi-caption">Checked out</div>
       </div>
 
       <div class="kpi-card not-scanned">
         <div class="kpi-header">
-          <span class="kpi-title">Not Scanned</span>
-          <i class="fa-solid fa-user-xmark kpi-icon"></i>
+          <span class="kpi-title">Not Marked</span>
+          <i class="fa-solid fa-user-clock kpi-icon"></i>
         </div>
         <div class="kpi-value" id="card-not-scanned">0</div>
-        <div class="kpi-caption">Pending entry scan</div>
+        <div class="kpi-caption">Pending check-in</div>
       </div>
     </section>
 
@@ -126,43 +142,73 @@
       <div class="table-toolbar-row">
         <div class="table-toolbar-title">
           <i class="fa-solid fa-clipboard-user" style="color: var(--primary);"></i>
-          Live Session Log
+          Today's Member Roster
         </div>
         <div class="table-controls">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="attendance-search" placeholder="Search by name, USN, dept...">
+            <input type="text" id="attendance-search" placeholder="Search by name, USN, dept, branch...">
           </div>
-          <select id="status-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+          <select id="attendance-filter-status" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
             <option value="ALL">All Statuses</option>
-            <option value="PRESENT">Present Only</option>
-            <option value="EXITED">Exited Only</option>
-            <option value="NOT SCANNED">Not Scanned</option>
+            <option value="Present">Present</option>
+            <option value="Left">Left</option>
+            <option value="Not Marked">Not Marked</option>
           </select>
+          <select id="attendance-filter-dept" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Departments</option>
+          </select>
+          <select id="attendance-filter-branch" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Branches</option>
+          </select>
+          <button type="button" class="btn-secondary" id="btn-export-today-csv">
+            <i class="fa-solid fa-file-csv"></i> CSV
+          </button>
+          <button type="button" class="btn-secondary btn-export-excel" id="btn-export-today-xlsx">
+            <i class="fa-solid fa-file-excel"></i> Excel
+          </button>
         </div>
       </div>
 
       <div class="responsive-table-holder">
-        <table class="roster-table">
+        <table class="roster-table" id="attendance-roster-table">
           <thead>
             <tr>
-              <th>Member Name</th>
-              <th>Department</th>
-              <th>USN</th>
-              <th>In Time</th>
-              <th>Out Time</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th data-sort="name" class="sortable">Member Name <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="department" class="sortable">Department <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="branch" class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="usn" class="sortable">USN <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="last_scan" class="sortable">Last Scan Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="in_time" class="sortable">In-Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="out_time" class="sortable">Exit Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="status" class="sortable">Status <i class="fa-solid fa-sort"></i></th>
             </tr>
           </thead>
-          <tbody id="attendance-today-body">
+          <tbody id="attendance-session-tbody">
             <tr>
-              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2rem;">
-                Fetching live session attendance...
+              <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading attendance session...
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="table-pagination-bar" id="attendance-pagination-bar">
+        <div class="page-size-selector">
+          <span>Show:</span>
+          <select id="attendance-page-size" class="select-input" style="padding: 0.25rem 0.5rem; font-size: 0.82rem;">
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="ALL">All rows</option>
+          </select>
+          <span id="attendance-pagination-info" style="margin-left: 0.5rem;">Showing 0 of 0 records</span>
+        </div>
+        <div class="pagination-controls" id="attendance-pagination-controls">
+          <!-- Page buttons injected by attendance.js -->
+        </div>
       </div>
     </section>
   </main>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | TechBots-SIT RFID Attendance System</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .login-container {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .login-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
+      max-width: 440px;
+      width: 100%;
+      padding: 2.25rem 2rem;
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-logo {
+      width: 56px;
+      height: 56px;
+      background: #eff6ff;
+      color: var(--primary);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid var(--primary-border);
+    }
+    .login-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.35rem;
+    }
+    .login-subtitle {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+    }
+    .alert-banner {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      font-size: 0.84rem;
+      margin-bottom: 1.25rem;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .alert-banner.error {
+      background: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fecaca;
+      display: flex;
+    }
+    .alert-banner.success {
+      background: #ecfdf5;
+      color: #065f46;
+      border: 1px solid #a7f3d0;
+      display: flex;
+    }
+    .password-toggle-wrapper {
+      position: relative;
+    }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Institutional Header & Branding Bar -->
+  <header class="header-wrapper">
+    <div class="top-branding-bar">
+      <a href="index.html" class="institution-group">
+        <div class="institution-logo-shield">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="institution-text-block">
+          <span class="college-name">SRINIVAS INSTITUTE OF TECHNOLOGY</span>
+          <span class="college-location">Valachil, Mangaluru</span>
+          <div class="club-branding-badge-container">
+            <span class="club-tag">TechBots</span>
+            <span class="system-title-tag">RFID ATTENDANCE SYSTEM</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-status-info">
+        <a href="index.html" class="btn-header-auth">
+          <i class="fa-solid fa-arrow-left"></i> Public Dashboard
+        </a>
+        <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="members.html" class="nav-menu-item">
+            <i class="fa-solid fa-users"></i> Members
+          </a>
+        </li>
+        <li>
+          <a href="attendance.html" class="nav-menu-item">
+            <i class="fa-solid fa-clipboard-check"></i> Attendance
+          </a>
+        </li>
+        <li>
+          <a href="reports.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-pie"></i> Reports
+          </a>
+        </li>
+        <li>
+          <a href="settings.html" class="nav-menu-item">
+            <i class="fa-solid fa-gear"></i> Settings
+          </a>
+        </li>
+        <li>
+          <a href="login.html" id="nav-item-auth" class="nav-menu-item active">
+            <i class="fa-solid fa-lock"></i> Login
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Login Main -->
+  <main class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <h1 class="login-title">Administrator Portal</h1>
+        <p class="login-subtitle">Sign in to manage members, assign RFID tags, and export records</p>
+      </div>
+
+      <div id="login-alert" class="alert-banner"></div>
+
+      <div id="already-logged-in-box" style="display: none; text-align: center; margin-bottom: 1.5rem;">
+        <p style="font-size: 0.9rem; color: #065f46; margin-bottom: 1rem;">
+          <i class="fa-solid fa-circle-check"></i> You are already logged in as <strong id="logged-admin-name">Admin</strong>.
+        </p>
+        <div style="display: flex; gap: 0.75rem; justify-content: center;">
+          <a href="members.html" class="btn-primary-scan" style="text-decoration: none; font-size: 0.85rem; padding: 0.5rem 1rem;">
+            Go to Members
+          </a>
+          <button id="btn-logout-here" class="btn-secondary" style="font-size: 0.85rem; padding: 0.5rem 1rem;">
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username"><i class="fa-solid fa-user" style="color: var(--primary);"></i> Username</label>
+          <input type="text" id="username" class="form-input" placeholder="e.g. admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group">
+          <label for="password"><i class="fa-solid fa-lock" style="color: var(--primary);"></i> Password</label>
+          <div class="password-toggle-wrapper">
+            <input type="password" id="password" class="form-input" placeholder="Enter administrator password" required autocomplete="current-password">
+            <button type="button" class="password-toggle-btn" id="btn-toggle-pwd" aria-label="Toggle password visibility">
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+          <div class="form-help-text">Default administrator configured via environment variables</div>
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn-primary-scan" style="width: 100%; margin-top: 1rem; justify-content: center;">
+          <i class="fa-solid fa-right-to-bracket"></i> Sign In to Admin Console
+        </button>
+      </form>
+
+      <div style="margin-top: 1.75rem; text-align: center; font-size: 0.78rem; color: var(--text-dim); border-top: 1px solid var(--border); padding-top: 1rem;">
+        Srinivas Institute of Technology &bull; TechBots Club Attendance
+      </div>
+    </div>
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="institutional-footer">
+    <div>
+      <strong>SRINIVAS INSTITUTE OF TECHNOLOGY</strong> &bull; Valachil, Mangaluru
+    </div>
+    <div>
+      <strong>TechBots</strong> &bull; RFID Attendance Management System
+    </div>
+  </footer>
+
+  <script src="js/navigation.js"></script>
+  <script>
+    const API_BASE = window.location.origin;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const token = localStorage.getItem("techbots_admin_token");
+      if (token) {
+        try {
+          const res = await fetch(`${API_BASE}/api/auth/me`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (data.authenticated) {
+            document.getElementById("already-logged-in-box").style.display = "block";
+            document.getElementById("login-form").style.display = "none";
+            document.getElementById("logged-admin-name").textContent = data.admin.username;
+          }
+        } catch (e) {
+          // Token invalid or network issue
+          localStorage.removeItem("techbots_admin_token");
+        }
+      }
+
+      // Password toggle
+      const pwdInput = document.getElementById("password");
+      const toggleBtn = document.getElementById("btn-toggle-pwd");
+      toggleBtn.addEventListener("click", () => {
+        const isPwd = pwdInput.type === "password";
+        pwdInput.type = isPwd ? "text" : "password";
+        toggleBtn.innerHTML = isPwd ? '<i class="fa-regular fa-eye-slash"></i>' : '<i class="fa-regular fa-eye"></i>';
+      });
+
+      // Logout button inside card
+      const logoutBtn = document.getElementById("btn-logout-here");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", () => {
+          localStorage.removeItem("techbots_admin_token");
+          window.location.reload();
+        });
+      }
+
+      // Handle login form submit
+      const form = document.getElementById("login-form");
+      const alertBox = document.getElementById("login-alert");
+      const submitBtn = document.getElementById("btn-login-submit");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        alertBox.className = "alert-banner";
+        alertBox.style.display = "none";
+
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+        try {
+          const response = await fetch(`${API_BASE}/api/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password })
+          });
+
+          const data = await response.json();
+
+          if (response.ok && data.success) {
+            localStorage.setItem("techbots_admin_token", data.token);
+            alertBox.className = "alert-banner success";
+            alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Authentication successful! Redirecting...';
+            alertBox.style.display = "flex";
+
+            setTimeout(() => {
+              window.location.href = "members.html";
+            }, 800);
+          } else {
+            alertBox.className = "alert-banner error";
+            alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${data.error || "Invalid username or password."}`;
+            alertBox.style.display = "flex";
+          }
+        } catch (err) {
+          alertBox.className = "alert-banner error";
+          alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Could not connect to server. Ensure Flask backend is running.`;
+          alertBox.style.display = "flex";
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In to Admin Console';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

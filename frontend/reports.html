@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRINIVAS INSTITUTE OF TECHNOLOGY | TechBots - Attendance Reports</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- Institutional Header & Branding Bar -->
+  <header class="header-wrapper">
+    <div class="top-branding-bar">
+      <a href="index.html" class="institution-group">
+        <div class="institution-logo-shield">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="institution-text-block">
+          <span class="college-name">SRINIVAS INSTITUTE OF TECHNOLOGY</span>
+          <span class="college-location">Valachil, Mangaluru</span>
+          <div class="club-branding-badge-container">
+            <span class="club-tag">TechBots</span>
+            <span class="system-title-tag">RFID ATTENDANCE SYSTEM</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="header-status-info">
+        <div class="status-indicator-pill">
+          <span class="status-dot"></span>
+          <span>System Active</span>
+        </div>
+        <div class="live-clock-pill" id="live-clock">--:--:--</div>
+        <div id="auth-header-slot">
+          <a href="login.html" class="btn-header-auth"><i class="fa-solid fa-lock"></i> Admin</a>
+        </div>
+        <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <nav class="nav-bar">
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-line"></i> Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="members.html" class="nav-menu-item">
+            <i class="fa-solid fa-users"></i> Members
+          </a>
+        </li>
+        <li>
+          <a href="attendance.html" class="nav-menu-item">
+            <i class="fa-solid fa-clipboard-check"></i> Attendance
+          </a>
+        </li>
+        <li>
+          <a href="reports.html" class="nav-menu-item active">
+            <i class="fa-solid fa-chart-pie"></i> Reports
+          </a>
+        </li>
+        <li>
+          <a href="settings.html" class="nav-menu-item">
+            <i class="fa-solid fa-gear"></i> Settings
+          </a>
+        </li>
+        <li>
+          <a href="login.html" id="nav-item-auth" class="nav-menu-item">
+            <i class="fa-solid fa-lock"></i> Login
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    <div class="page-header-row">
+      <div>
+        <h1 class="page-main-heading">Attendance Reports & Archive</h1>
+        <p class="page-sub-heading">Generate multi-date reports, department summaries, and export filtered logs</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn-secondary" id="btn-export-csv">
+          <i class="fa-solid fa-file-csv"></i> Export CSV
+        </button>
+        <button class="btn-secondary btn-export-excel" id="btn-export-xlsx">
+          <i class="fa-solid fa-file-excel"></i> Export Excel
+        </button>
+      </div>
+    </div>
+
+    <!-- Date Range & Quick Filter Strip -->
+    <section class="panel-card" style="margin-bottom: 1.5rem; padding: 1.25rem 1.5rem;">
+      <div style="display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end;">
+        <div style="flex: 1; min-width: 160px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">
+            <i class="fa-regular fa-calendar" style="color: var(--primary);"></i> From Date:
+          </label>
+          <input type="date" id="report-start-date" class="form-input">
+        </div>
+
+        <div style="flex: 1; min-width: 160px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">
+            <i class="fa-regular fa-calendar-check" style="color: var(--primary);"></i> To Date:
+          </label>
+          <input type="date" id="report-end-date" class="form-input">
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; align-items: center; margin-top: auto;">
+          <button class="btn-primary-scan" id="btn-run-report" style="padding: 0.6rem 1.25rem; font-size: 0.88rem;">
+            <i class="fa-solid fa-filter"></i> Generate Report
+          </button>
+          <button class="btn-secondary" id="btn-quick-today" style="padding: 0.6rem 0.85rem; font-size: 0.82rem;">Today</button>
+          <button class="btn-secondary" id="btn-quick-all" style="padding: 0.6rem 0.85rem; font-size: 0.82rem;">All Dates</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- KPI Summary Grid for Filtered Report -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Total Records</span>
+          <i class="fa-solid fa-list-ol kpi-icon"></i>
+        </div>
+        <div class="kpi-value" id="rep-stat-total">0</div>
+        <div class="kpi-caption" id="rep-date-span">Selected period</div>
+      </div>
+
+      <div class="kpi-card present">
+        <div class="kpi-header">
+          <span class="kpi-title">Present (Entry)</span>
+          <i class="fa-solid fa-door-open kpi-icon" style="color: #059669;"></i>
+        </div>
+        <div class="kpi-value" id="rep-stat-present">0</div>
+        <div class="kpi-caption">Scanned IN for session</div>
+      </div>
+
+      <div class="kpi-card exited">
+        <div class="kpi-header">
+          <span class="kpi-title">Left (Checked Out)</span>
+          <i class="fa-solid fa-door-closed kpi-icon" style="color: #d97706;"></i>
+        </div>
+        <div class="kpi-value" id="rep-stat-left">0</div>
+        <div class="kpi-caption">Scanned OUT of session</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">Turnout Rate</span>
+          <i class="fa-solid fa-percent kpi-icon" style="color: var(--primary);"></i>
+        </div>
+        <div class="kpi-value" id="rep-stat-rate">0%</div>
+        <div class="kpi-caption">Present / Active ratio</div>
+      </div>
+    </section>
+
+    <!-- Department Summary Cards -->
+    <section class="panel-card" style="margin-bottom: 1.5rem;">
+      <div class="panel-card-header">
+        <h2 class="panel-card-title">
+          <i class="fa-solid fa-building-columns" style="color: var(--primary);"></i>
+          Department-Wise Breakdown
+        </h2>
+      </div>
+      <div id="dept-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="color: var(--text-dim); font-size: 0.85rem;">Generating department metrics...</div>
+      </div>
+    </section>
+
+    <!-- Filtered Records Table -->
+    <section class="table-panel">
+      <div class="table-toolbar-row">
+        <div class="table-toolbar-title">
+          <i class="fa-solid fa-table-list" style="color: var(--primary);"></i>
+          Attendance Log Details
+        </div>
+        <div class="table-controls">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="report-search" placeholder="Search by name, USN, dept...">
+          </div>
+
+          <select id="report-dept-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Departments</option>
+          </select>
+
+          <select id="report-branch-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Branches</option>
+          </select>
+
+          <select id="report-status-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Statuses</option>
+            <option value="Present">Present</option>
+            <option value="Left">Left</option>
+            <option value="Not Marked">Not Marked</option>
+          </select>
+
+          <button class="btn-secondary" id="btn-refresh-report">
+            <i class="fa-solid fa-arrows-rotate"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="responsive-table-holder">
+        <table class="roster-table" id="reports-roster-table">
+          <thead>
+            <tr>
+              <th data-sort="date" class="sortable">Date <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="name" class="sortable">Member Name <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="department" class="sortable">Department <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="branch" class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="usn" class="sortable">USN <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="in_time" class="sortable">In Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="out_time" class="sortable">Exit Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="status" class="sortable">Status <i class="fa-solid fa-sort"></i></th>
+            </tr>
+          </thead>
+          <tbody id="report-table-body">
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                Select date range and click Generate Report...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="table-pagination-bar" id="reports-pagination-bar">
+        <div class="page-size-selector">
+          <span>Show:</span>
+          <select id="reports-page-size" class="select-input" style="padding: 0.25rem 0.5rem; font-size: 0.82rem;">
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="ALL">All rows</option>
+          </select>
+          <span id="reports-pagination-info" style="margin-left: 0.5rem;">Showing 0 of 0 records</span>
+        </div>
+        <div class="pagination-controls" id="reports-pagination-controls">
+          <!-- Page buttons injected by reports.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Institutional Footer -->
+  <footer class="institutional-footer">
+    <div>
+      <strong>SRINIVAS INSTITUTE OF TECHNOLOGY</strong> &bull; Valachil, Mangaluru
+    </div>
+    <div>
+      <strong>TechBots</strong> &bull; RFID Attendance System
+    </div>
+  </footer>
+
+  <script src="js/navigation.js"></script>
+  <script src="js/reports.js"></script>
+</body>
+</html>

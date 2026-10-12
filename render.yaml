@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: techbots-sit-attendance
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT wsgi:app
+    plan: free
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: TIMEZONE
+        value: Asia/Kolkata
+      - key: ADMIN_USERNAME
+        value: admin
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: RFID_API_SECRET
+        value: techbots-sit-rfid-hw-secret-2026
+      - key: RAPID_SCAN_COOLDOWN_SECONDS
+        value: "15"

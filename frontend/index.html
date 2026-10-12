@@ -9,6 +9,12 @@
 </head>
 <body>
 
+  <!-- Disconnected / Server Error Banner (Shown only if server drops) -->
+  <div id="offline-banner" class="server-offline-banner" style="display: none;">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>Backend Disconnected: Unable to reach Flask attendance API. Retrying connection...</span>
+  </div>
+
   <!-- Institutional Header & Branding Bar -->
   <header class="header-wrapper">
     <div class="top-branding-bar">
@@ -27,18 +33,21 @@
       </a>
 
       <div class="header-status-info">
-        <div class="status-indicator-pill">
+        <div class="status-indicator-pill" id="system-status-indicator">
           <span class="status-dot"></span>
-          <span>System Active</span>
+          <span id="system-status-text">System Active</span>
         </div>
         <div class="live-clock-pill" id="live-clock">--:--:--</div>
+        <div id="auth-header-slot">
+          <a href="login.html" class="btn-header-auth"><i class="fa-solid fa-lock"></i> Admin</a>
+        </div>
         <button class="mobile-nav-toggle" id="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
           <i class="fa-solid fa-bars"></i>
         </button>
       </div>
     </div>
 
-    <!-- Main Navigation Bar -->
+    <!-- Main Navigation Bar (All 6 core sections) -->
     <nav class="nav-bar">
       <ul class="nav-menu">
         <li>
@@ -53,12 +62,22 @@
         </li>
         <li>
           <a href="attendance.html" class="nav-menu-item">
-            <i class="fa-solid fa-clipboard-check"></i> Today's Attendance
+            <i class="fa-solid fa-clipboard-check"></i> Attendance
           </a>
         </li>
         <li>
-          <a href="history.html" class="nav-menu-item">
-            <i class="fa-solid fa-clock-rotate-left"></i> Attendance History
+          <a href="reports.html" class="nav-menu-item">
+            <i class="fa-solid fa-chart-pie"></i> Reports
+          </a>
+        </li>
+        <li>
+          <a href="settings.html" class="nav-menu-item">
+            <i class="fa-solid fa-gear"></i> Settings
+          </a>
+        </li>
+        <li>
+          <a href="login.html" id="nav-item-auth" class="nav-menu-item">
+            <i class="fa-solid fa-lock"></i> Login
           </a>
         </li>
       </ul>
@@ -69,10 +88,10 @@
   <main class="container">
     <div class="page-header-row">
       <div>
-        <h1 class="page-main-heading">Attendance Overview</h1>
-        <p class="page-sub-heading" id="current-date-display">Live RFID access tracking & club attendance records</p>
+        <h1 class="page-main-heading">Live Attendance Overview</h1>
+        <p class="page-sub-heading" id="current-date-display">Real-time RFID access tracking & club attendance records (Asia/Kolkata)</p>
       </div>
-      <div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
         <button class="btn-secondary" id="btn-manual-refresh">
           <i class="fa-solid fa-arrows-rotate"></i> Refresh Data
         </button>
@@ -83,7 +102,7 @@
     <section class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-header">
-          <span class="kpi-title">Total Members</span>
+          <span class="kpi-title">Total Registered Members</span>
           <i class="fa-solid fa-users kpi-icon"></i>
         </div>
         <div class="kpi-value" id="stat-total">0</div>
@@ -92,7 +111,7 @@
 
       <div class="kpi-card present">
         <div class="kpi-header">
-          <span class="kpi-title">Present</span>
+          <span class="kpi-title">Present Now</span>
           <i class="fa-solid fa-door-open kpi-icon" style="color: #059669;"></i>
         </div>
         <div class="kpi-value" id="stat-present">0</div>
@@ -101,20 +120,20 @@
 
       <div class="kpi-card exited">
         <div class="kpi-header">
-          <span class="kpi-title">Exited</span>
+          <span class="kpi-title">Members Left</span>
           <i class="fa-solid fa-door-closed kpi-icon" style="color: #d97706;"></i>
         </div>
         <div class="kpi-value" id="stat-exited">0</div>
         <div class="kpi-caption">Scanned OUT of session</div>
       </div>
 
-      <div class="kpi-card not-scanned">
+      <div class="kpi-card">
         <div class="kpi-header">
-          <span class="kpi-title">Not Scanned</span>
-          <i class="fa-solid fa-user-clock kpi-icon"></i>
+          <span class="kpi-title">Attendance Records Today</span>
+          <i class="fa-solid fa-calendar-check kpi-icon" style="color: var(--primary);"></i>
         </div>
-        <div class="kpi-value" id="stat-not-scanned">0</div>
-        <div class="kpi-caption">Pending check-in</div>
+        <div class="kpi-value" id="stat-today-records">0</div>
+        <div class="kpi-caption">Checked-in today</div>
       </div>
     </section>
 
@@ -127,17 +146,17 @@
             <i class="fa-solid fa-id-card-clip" style="color: var(--primary);"></i>
             RFID Card Simulation
           </h2>
-          <span class="dept-badge">ESP32 Ready</span>
+          <span class="dept-badge"><i class="fa-solid fa-microchip"></i> ESP32 Ready</span>
         </div>
         <p class="panel-card-caption">
-          Select a member to simulate an RFID card tap. 1st tap records <strong>ENTRY</strong>; 2nd tap records <strong>EXIT</strong>.
+          Select a member to simulate a card tap. 1st tap records <strong>ENTRY (Present)</strong>; 2nd tap records <strong>EXIT (Left)</strong>.
         </p>
 
         <form id="rfid-scan-form" class="scan-form-stack" onsubmit="return false;">
           <div class="form-field-group" id="dropdown-group">
             <div class="form-label-row">
-              <label for="member-select">Select Club Member (Simulated RFID Tag)</label>
-              <button type="button" class="btn-link-action" id="btn-toggle-manual">Manual USN Input</button>
+              <label for="member-select">Select Club Member (Simulated Card)</label>
+              <button type="button" class="btn-link-action" id="btn-toggle-manual">Manual Card UID / USN</button>
             </div>
             <select id="member-select" class="select-input">
               <option value="">-- Choose Member to Tap Card --</option>
@@ -146,15 +165,15 @@
 
           <div class="form-field-group" id="manual-group" style="display: none;">
             <div class="form-label-row">
-              <label for="manual-identifier">USN or Custom Card UID</label>
+              <label for="manual-identifier">Enter Card UID or USN</label>
               <button type="button" class="btn-link-action" id="btn-toggle-dropdown">Back to Dropdown</button>
             </div>
-            <input type="text" id="manual-identifier" class="text-input" placeholder="e.g. 4SN25CS002 or UNREGISTERED_TAG">
+            <input type="text" id="manual-identifier" class="text-input" placeholder="e.g. 4SN25CS002 or E3A4128B or UNKNOWN_TAG">
           </div>
 
           <div>
             <button type="button" id="btn-scan-card" class="btn-primary-scan" style="width: 100%;">
-              <i class="fa-solid fa-wifi"></i> SCAN CARD
+              <i class="fa-solid fa-wifi"></i> TAP RFID CARD
             </button>
           </div>
         </form>
@@ -162,7 +181,7 @@
         <!-- Notification Bar -->
         <div id="scan-alert-box" class="scan-notification-bar">
           <i id="scan-alert-icon" class="fa-solid fa-circle-check"></i>
-          <span id="scan-alert-text">Ready to scan.</span>
+          <span id="scan-alert-text">Ready to scan. Waiting for RFID card tap...</span>
         </div>
       </section>
 
@@ -190,46 +209,75 @@
       <div class="table-toolbar-row">
         <div class="table-toolbar-title">
           <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
-          Today's Attendance Roster
+          <span>Live Attendance Roster</span>
         </div>
         <div class="table-controls">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="table-search" placeholder="Search by name, USN, dept...">
+            <input type="text" id="table-search" placeholder="Search by name, USN, dept, branch...">
           </div>
+          <input type="date" id="table-date" class="form-input" style="width: auto; padding: 0.45rem 0.65rem; font-size: 0.84rem;" title="Select attendance date">
           <select id="status-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
             <option value="ALL">All Statuses</option>
-            <option value="PRESENT">Present</option>
-            <option value="EXITED">Exited</option>
-            <option value="NOT SCANNED">Not Scanned</option>
+            <option value="Present">Present</option>
+            <option value="Left">Left</option>
+            <option value="Not Marked">Not Marked</option>
           </select>
-          <a href="/api/attendance/export" class="btn-secondary btn-export-excel" id="btn-export-today" download>
-            <i class="fa-solid fa-file-excel"></i> Export Excel
-          </a>
+          <select id="dept-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Departments</option>
+          </select>
+          <select id="branch-filter" class="select-input" style="width: auto; padding: 0.45rem 0.75rem;">
+            <option value="ALL">All Branches</option>
+          </select>
+          <button type="button" class="btn-secondary" id="btn-export-csv-today">
+            <i class="fa-solid fa-file-csv"></i> CSV
+          </button>
+          <button type="button" class="btn-secondary btn-export-excel" id="btn-export-today">
+            <i class="fa-solid fa-file-excel"></i> Excel
+          </button>
         </div>
       </div>
 
       <div class="responsive-table-holder">
-        <table class="roster-table">
+        <table class="roster-table" id="dashboard-roster-table">
           <thead>
             <tr>
-              <th>Member Name</th>
-              <th>Department</th>
-              <th>USN</th>
-              <th>In Time</th>
-              <th>Out Time</th>
-              <th>Status</th>
+              <th data-sort="name" class="sortable">Member Name <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="department" class="sortable">Department <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="branch" class="sortable">Branch <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="usn" class="sortable">USN <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="last_scan" class="sortable">Last Scan Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="in_time" class="sortable">In-Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="out_time" class="sortable">Exit Time <i class="fa-solid fa-sort"></i></th>
+              <th data-sort="status" class="sortable">Status <i class="fa-solid fa-sort"></i></th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="attendance-table-body">
             <tr>
-              <td colspan="7" style="text-align: center; color: var(--text-dim); padding: 2rem;">
-                Loading attendance records...
+              <td colspan="9" style="text-align: center; color: var(--text-dim); padding: 2rem;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading attendance records...
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination Bar -->
+      <div class="table-pagination-bar" id="dashboard-pagination-bar">
+        <div class="page-size-selector">
+          <span>Show:</span>
+          <select id="table-page-size" class="select-input" style="padding: 0.25rem 0.5rem; font-size: 0.82rem;">
+            <option value="10" selected>10 rows</option>
+            <option value="25">25 rows</option>
+            <option value="50">50 rows</option>
+            <option value="ALL">All rows</option>
+          </select>
+          <span id="table-pagination-info" style="margin-left: 0.5rem;">Showing 0 of 0 records</span>
+        </div>
+        <div class="pagination-controls" id="dashboard-pagination-controls">
+          <!-- Page buttons injected by dashboard.js -->
+        </div>
       </div>
     </section>
   </main>

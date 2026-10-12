@@ -1,10 +1,34 @@
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Environment variables & secrets
+.env
 *.env
-.venv
+.env.local
+
+# Virtual environments
+.venv/
 env/
 venv/
+ENV/
+
+# Temporary and office lock files
 *.tmp
 ~$*
 .DS_Store
+Thumbs.db
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Backups generated dynamically
+data/backups/*
+!data/backups/.gitkeep
+
+# IDE configuration
+.vscode/
+.idea/
